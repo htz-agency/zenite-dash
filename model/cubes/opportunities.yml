@@ -1,0 +1,241 @@
+cubes:
+  - name: opportunities
+    sql_table: public.crm_opportunities
+
+    joins:
+      - name: accounts
+        sql: "{CUBE}.account = {accounts}.name"
+        relationship: many_to_one
+
+      - name: activities
+        sql: "{CUBE}.id = {activities}.entity_id AND {activities}.entity_type = 'opportunity'"
+        relationship: one_to_many
+
+      - name: proposals
+        sql: "{CUBE}.id = {proposals}.opportunity_id"
+        relationship: one_to_many
+
+    measures:
+      - name: count
+        type: count
+
+      - name: total_value
+        type: sum
+        sql: value
+
+      - name: avg_value
+        type: avg
+        sql: value
+
+      - name: max_value
+        type: max
+        sql: value
+
+      - name: min_value
+        type: min
+        sql: value
+
+      - name: avg_score
+        type: avg
+        sql: score
+
+      - name: weighted_pipeline
+        type: number
+        sql: "SUM({CUBE}.value * COALESCE({CUBE}.score, 10) / 100.0)"
+
+      - name: won_count
+        type: count
+        filters:
+          - sql: "LOWER({CUBE}.stage::text) SIMILAR TO '%(ganho|ganha|won)%'"
+
+      - name: lost_count
+        type: count
+        filters:
+          - sql: "LOWER({CUBE}.stage::text) SIMILAR TO '%(perdid|lost)%'"
+
+      - name: open_count
+        type: count
+        filters:
+          - sql: "LOWER({CUBE}.stage::text) NOT SIMILAR TO '%(ganho|ganha|won|perdid|lost)%'"
+
+      - name: won_value
+        type: sum
+        sql: value
+        filters:
+          - sql: "LOWER({CUBE}.stage::text) SIMILAR TO '%(ganho|ganha|won)%'"
+
+      - name: lost_value
+        type: sum
+        sql: value
+        filters:
+          - sql: "LOWER({CUBE}.stage::text) SIMILAR TO '%(perdid|lost)%'"
+
+      - name: win_rate
+        type: number
+        sql: "CASE WHEN ({won_count} + {lost_count}) > 0 THEN ROUND(({won_count}::numeric / ({won_count} + {lost_count})::numeric) * 100, 2) ELSE 0 END"
+
+      - name: avg_days_to_close
+        type: avg
+        sql: "EXTRACT(EPOCH FROM ({CUBE}.close_date::timestamp - {CUBE}.created_at)) / 86400.0"
+
+    dimensions:
+      - name: id
+        sql: id
+        type: string
+        primary_key: true
+
+      - name: name
+        sql: name
+        type: string
+
+      - name: company
+        sql: company
+        type: string
+
+      - name: stage
+        sql: stage
+        type: string
+
+      - name: stage_complement
+        sql: stage_complement
+        type: string
+
+      - name: tipo
+        sql: tipo
+        type: string
+
+      - name: type
+        sql: type
+        type: string
+
+      - name: owner
+        sql: owner
+        type: string
+
+      - name: decisor
+        sql: decisor
+        type: string
+
+      - name: account
+        sql: account
+        type: string
+
+      - name: origin
+        sql: origin
+        type: string
+
+      - name: value
+        sql: value
+        type: number
+
+      - name: score
+        sql: score
+        type: number
+
+      - name: score_label
+        sql: score_label
+        type: string
+
+      - name: tag
+        sql: tag
+        type: string
+
+      - name: most_recent
+        sql: most_recent
+        type: boolean
+
+      - name: needs_objective
+        sql: needs_objective
+        type: string
+
+      - name: needs_budget
+        sql: needs_budget
+        type: string
+
+      - name: needs_timeline
+        sql: needs_timeline
+        type: string
+
+      - name: mkt_campanha
+        sql: mkt_campanha
+        type: string
+
+      - name: mkt_canal
+        sql: mkt_canal
+        type: string
+
+      - name: mkt_anuncio
+        sql: mkt_anuncio
+        type: string
+
+      - name: mkt_grupo_anuncios
+        sql: mkt_grupo_anuncios
+        type: string
+
+      - name: created_by
+        sql: created_by
+        type: string
+
+      - name: created_at
+        sql: created_at
+        type: time
+
+      - name: updated_at
+        sql: updated_at
+        type: time
+
+      - name: close_date
+        sql: close_date
+        type: time
+
+      - name: last_activity_date
+        sql: last_activity_date
+        type: time
+
+      - name: mkt_ultima_conversao
+        sql: mkt_ultima_conversao
+        type: time
+
+      # Computed dimensions
+      - name: stage_group
+        type: string
+        case:
+          when:
+            - sql: "LOWER({CUBE}.stage::text) SIMILAR TO '%(ganho|ganha|won)%'"
+              label: Ganhas
+            - sql: "LOWER({CUBE}.stage::text) SIMILAR TO '%(perdid|lost)%'"
+              label: Perdidas
+          else:
+            label: Em aberto
+
+      - name: value_range
+        type: string
+        case:
+          when:
+            - sql: "{CUBE}.value IS NULL OR {CUBE}.value = 0"
+              label: Sem valor
+            - sql: "{CUBE}.value < 5000"
+              label: "< R$5k"
+            - sql: "{CUBE}.value < 20000"
+              label: "R$5k - R$20k"
+            - sql: "{CUBE}.value < 50000"
+              label: "R$20k - R$50k"
+            - sql: "{CUBE}.value < 100000"
+              label: "R$50k - R$100k"
+          else:
+            label: "> R$100k"
+
+    pre_aggregations:
+      - name: opps_by_month
+        measures:
+          - count
+          - total_value
+          - won_count
+          - lost_count
+          - win_rate
+        dimensions:
+          - stage
+          - owner
+          - origin
+        time_dimension: created_at
+        granularity: month
