@@ -1,0 +1,66 @@
+cubes:
+  - name: proposal_services
+    sql_table: public.crm_opportunity_services
+
+    joins:
+      - name: proposals
+        sql: "{CUBE}.opportunity_id = {proposals}.opportunity_id"
+        relationship: many_to_one
+
+    measures:
+      - name: count
+        type: count
+
+      - name: total_base_price
+        type: sum
+        sql: base_price
+
+      - name: total_impl_price
+        type: sum
+        sql: impl_price
+
+      - name: total_hours
+        type: sum
+        sql: hours
+
+      - name: total_quantity
+        type: sum
+        sql: quantity
+
+      - name: avg_base_price
+        type: avg
+        sql: base_price
+
+    dimensions:
+      - name: service_id
+        sql: service_id
+        type: string
+        primary_key: true
+
+      - name: opportunity_id
+        sql: opportunity_id
+        type: string
+
+      - name: name
+        sql: name
+        type: string
+
+      - name: group
+        sql: "{CUBE}.\"group\""
+        type: string
+
+      - name: quantity
+        sql: quantity
+        type: number
+
+      - name: base_price
+        sql: base_price
+        type: number
+
+      - name: impl_price
+        sql: impl_price
+        type: number
+
+      - name: hours
+        sql: hours
+        type: number
