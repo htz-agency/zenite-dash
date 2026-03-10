@@ -106,6 +106,81 @@ function monthKey(date: string | Date): string {
 
 app.get("/make-server-d2ca3281/health", (c) => c.json({ status: "ok" }));
 
+// ══════════════════════════════════════════════════════════════
+//  STATIC ASSETS — Supabase Storage (mascot, logos, etc.)
+// ══════════════════════════════════════════════════════════════
+
+const ASSETS_BUCKET = "make-d2ca3281-assets";
+
+let bucketReady = false;
+async function ensureAssetsBucket() {
+  if (bucketReady) return;
+  const db = supabase();
+  const { data: buckets } = await db.storage.listBuckets();
+  const exists = buckets?.some((b: any) => b.name === ASSETS_BUCKET);
+  if (!exists) {
+    await db.storage.createBucket(ASSETS_BUCKET, { public: false });
+  }
+  bucketReady = true;
+}
+
+// POST /assets/upload — Upload a named asset (e.g. turing-mascot)
+app.post("/make-server-d2ca3281/assets/upload", async (c) => {
+  try {
+    await ensureAssetsBucket();
+    const db = supabase();
+    const formData = await c.req.formData();
+    const file = formData.get("file") as File | null;
+    const name = formData.get("name") as string | null;
+    if (!file || !name) {
+      return c.json({ error: "Missing 'file' or 'name' in form data" }, 400);
+    }
+    const ext = file.name.split(".").pop() || "png";
+    const path = `${name}.${ext}`;
+    const arrayBuf = await file.arrayBuffer();
+    const { error } = await db.storage
+      .from(ASSETS_BUCKET)
+      .upload(path, arrayBuf, {
+        contentType: file.type || "image/png",
+        upsert: true,
+      });
+    if (error) {
+      console.log(`[Assets] Upload error for ${path}:`, error.message);
+      return c.json({ error: error.message }, 500);
+    }
+    console.log(`[Assets] Uploaded ${path}`);
+    return c.json({ ok: true, path });
+  } catch (err: any) {
+    console.log("[Assets] Upload exception:", err?.message || err);
+    return c.json({ error: err?.message || "Upload failed" }, 500);
+  }
+});
+
+// GET /assets/:name — Get a signed URL for a named asset
+app.get("/make-server-d2ca3281/assets/:name", async (c) => {
+  try {
+    await ensureAssetsBucket();
+    const db = supabase();
+    const name = c.req.param("name");
+    const { data: files } = await db.storage.from(ASSETS_BUCKET).list("", { limit: 100 });
+    const match = files?.find((f: any) => f.name.startsWith(name + "."));
+    if (!match) {
+      return c.json({ error: "Asset not found", name }, 404);
+    }
+    const { data, error } = await db.storage
+      .from(ASSETS_BUCKET)
+      .createSignedUrl(match.name, 3600);
+    if (error || !data?.signedUrl) {
+      console.log(`[Assets] Signed URL error for ${name}:`, error?.message);
+      return c.json({ error: error?.message || "Failed to create signed URL" }, 500);
+    }
+    return c.json({ url: data.signedUrl, name: match.name });
+  } catch (err: any) {
+    console.log("[Assets] Get exception:", err?.message || err);
+    return c.json({ error: err?.message || "Failed to get asset" }, 500);
+  }
+});
+
 // ── GET /dash/data — Aggregate all CRM data for the BI dashboard ──
 app.get("/make-server-d2ca3281/dash/data", async (c) => {
   try {

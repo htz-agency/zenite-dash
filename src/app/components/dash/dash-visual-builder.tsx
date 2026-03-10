@@ -44,7 +44,7 @@ import { formatRelativeDate, type RelativeDateValue, type RelativeDatePreset, ty
 import { relativeDateToRange, isDateInRange } from "./dash-relative-date-utils";
 import { RhombusMatrixChart } from "./dash-rhombus-matrix";
 import { SankeyChart, type SankeyLink } from "./dash-sankey-chart";
-import turingMascot from "figma:asset/a0a098268cd5d371916d7667ac146292c14e5a3f.png";
+import { TuringMascot } from "./TuringMascot";
 import { projectId, publicAnonKey } from "/utils/supabase/info";
 
 const ff = { fontFeatureSettings: "'ss01', 'ss04', 'ss05', 'ss07'" };
@@ -5890,7 +5890,7 @@ function VisualBuilderInner() {
                 
                 {/* Mascote no fundo */}
                 <div className="flex-1 flex items-end justify-center">
-                  <img src={turingMascot} alt="Turing" className="w-full h-auto object-contain" />
+                  <TuringMascot size={80} />
                 </div>
               </div>
 

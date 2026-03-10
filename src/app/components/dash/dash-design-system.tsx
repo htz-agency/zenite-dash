@@ -83,7 +83,7 @@ import {
   Invoice,
   Atom,
 } from "@phosphor-icons/react";
-import turingMascot from "figma:asset/a0a098268cd5d371916d7667ac146292c14e5a3f.png";
+import { TuringMascot } from "./TuringMascot";
 
 const fontFeature = { fontFeatureSettings: "'ss01', 'ss04', 'ss05', 'ss07'" };
 
@@ -613,9 +613,7 @@ export function DashDesignSystem() {
           {/* Mascote */}
           <Label>Mascote Oficial — Turing (Funko Pop)</Label>
           <div className="flex items-start gap-[24px] mb-[20px]">
-            <div className="w-[120px] h-[140px] rounded-[16px] bg-[#F6F7F9] border border-[#DDE3EC] flex items-center justify-center overflow-hidden p-2">
-              <img src={turingMascot} alt="Turing Mascot" className="w-full h-full object-contain" />
-            </div>
+            <TuringMascot size={120} showUpload className="shrink-0" />
             <div className="flex flex-col gap-[6px] pt-[4px]">
               <span className="text-[#122232]" style={{ fontSize: 14, fontWeight: 700, letterSpacing: -0.3, ...fontFeature }}>
                 Agent Turing
