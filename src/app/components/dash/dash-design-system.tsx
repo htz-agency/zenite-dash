@@ -83,7 +83,7 @@ import {
   Invoice,
   Atom,
 } from "@phosphor-icons/react";
-import turingMascot from "figma:asset/07163dec45696b11e50259fd2a744d2ef2c2b201.png";
+import turingMascot from "figma:asset/a0a098268cd5d371916d7667ac146292c14e5a3f.png";
 
 const fontFeature = { fontFeatureSettings: "'ss01', 'ss04', 'ss05', 'ss07'" };
 
