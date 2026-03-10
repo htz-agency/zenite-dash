@@ -364,10 +364,16 @@ export function DashDataProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       // Silently ignore abort errors (component unmounted / navigation)
       if (err instanceof DOMException && err.name === "AbortError") return;
-      console.error("[Dash] Error loading CRM data:", err);
+      
+      // Network errors (server unreachable) are expected when CRM tables aren't set up
+      const isNetworkError = err instanceof TypeError && err.message === "Failed to fetch";
+      if (isNetworkError) {
+        console.log("[Dash] Server unreachable — loading demo data");
+      } else {
+        console.log("[Dash] CRM data fetch error, using demo data:", err?.message || err);
+      }
       
       // Fallback para dados mock quando servidor falhar
-      console.warn("[Dash] Falling back to mock data due to fetch error");
       const mockData = await import("./dash-mock-data");
       setData({
         leads: mockData.leads || [],

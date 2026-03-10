@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { DashDataProvider, useDashData } from "./dash-data-provider";
 import { DashFilterProvider, useDashFilters, PERIOD_OPTIONS } from "./dash-filter-context";
 import { exportToCSV, exportToPDF } from "./dash-export-utils";
+import { TuringButton } from "@/components/turing/TuringButton";
 
 const ff = { fontFeatureSettings: "'ss01', 'ss04', 'ss05', 'ss07'" };
 
@@ -336,6 +337,7 @@ export function DashLayout() {
       <DashFilterProvider>
         <div className="flex h-screen overflow-hidden">
           <Toaster position="top-right" toastOptions={{ style: { fontFamily: "'DM Sans', sans-serif", fontSize: 13 } }} />
+          <TuringButton />
           <DashSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           <div className="flex flex-col flex-1 overflow-hidden min-w-0">
             <DashTopBar onMenuToggle={() => setSidebarOpen(true)} />

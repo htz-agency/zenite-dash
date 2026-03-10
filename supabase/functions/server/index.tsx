@@ -2,6 +2,15 @@ import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
 import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
+import {
+  type TuringRequest,
+  type SessionContext,
+  buildSystemPrompt,
+  getConnectedSources,
+  saveQueryHistory,
+  executeSafeQuery,
+  callGemini,
+} from "./turing.tsx";
 
 // ── Suppress "Http: connection closed before message completed" ──────────────
 // This Deno runtime error fires when a client disconnects mid-response.
@@ -1242,6 +1251,133 @@ app.get("/make-server-d2ca3281/dash/sync/platforms", async (c) => {
   } catch (err) {
     console.log(`Error fetching sync platforms: ${err}`);
     return c.json({ error: `${err}`, connected: false }, 500);
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+//  TURING — Agente IA do Zenite Cloud
+// ══════════════════════════════════════════════════════════════
+
+// ── POST /turing-ask — Process a Turing AI question ──
+app.post("/make-server-d2ca3281/turing-ask", async (c) => {
+  try {
+    const authHeader = c.req.header("Authorization");
+    if (!authHeader) {
+      return c.json({ error: "Nao autorizado." }, 401);
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await userClient.auth.getUser();
+    if (authError || !user) {
+      return c.json({ error: "Sessao invalida." }, 401);
+    }
+
+    // Try to get profile, but use defaults if not available
+    let session: SessionContext;
+    try {
+      const { data: profile } = await userClient
+        .from("profiles")
+        .select("name, role, org_id, organizations(name)")
+        .eq("id", user.id)
+        .single();
+
+      if (profile) {
+        session = {
+          user_id: user.id,
+          user_name: profile.name ?? user.email ?? "Usuario",
+          user_role: profile.role ?? "admin",
+          org_id: profile.org_id ?? "default",
+          org_name: (profile.organizations as { name: string })?.name ?? "Organizacao",
+        };
+      } else {
+        session = {
+          user_id: user.id,
+          user_name: user.email ?? "Usuario",
+          user_role: "admin",
+          org_id: "default",
+          org_name: "Zenite Cloud",
+        };
+      }
+    } catch {
+      session = {
+        user_id: user.id,
+        user_name: user.email ?? "Usuario",
+        user_role: "admin",
+        org_id: "default",
+        org_name: "Zenite Cloud",
+      };
+    }
+
+    const body: TuringRequest = await c.req.json();
+    if (!body.message?.trim()) {
+      return c.json({ error: "Mensagem vazia." }, 400);
+    }
+
+    console.log(`[Turing] Question from ${session.user_name}: "${body.message.substring(0, 80)}..."`);
+
+    const connectedSources = await getConnectedSources(userClient, session.org_id);
+    const systemPrompt = buildSystemPrompt(session, connectedSources);
+    const rawResponse = await callGemini(systemPrompt, body.history ?? [], body.message);
+
+    let turingResponse: Record<string, unknown>;
+    try {
+      turingResponse = JSON.parse(rawResponse);
+    } catch {
+      turingResponse = { type: "text", message: rawResponse };
+    }
+
+    let queryResult = null;
+    if (turingResponse.type === "query" && turingResponse.sql) {
+      const db = supabase();
+      const { data, error } = await executeSafeQuery(
+        db,
+        turingResponse.sql as string,
+        session.org_id
+      );
+
+      if (error) {
+        console.log(`[Turing] Query execution error: ${error}`);
+        turingResponse = {
+          type: "error",
+          message: `Nao consegui executar essa consulta: ${error}`,
+          suggestions: ["Tente reformular a pergunta", "Verifique se a fonte de dados esta conectada"],
+        };
+      } else {
+        queryResult = data;
+        console.log(`[Turing] Query returned ${Array.isArray(data) ? data.length : 0} rows`);
+      }
+    }
+
+    // Save history in background (non-blocking)
+    saveQueryHistory(
+      userClient,
+      session,
+      body.message,
+      turingResponse,
+      (turingResponse.sql as string) ?? null
+    ).catch((err: unknown) => console.log(`[Turing] History save failed: ${err}`));
+
+    return c.json({
+      turing: turingResponse,
+      data: queryResult,
+      session: {
+        user_name: session.user_name,
+        org_name: session.org_name,
+      },
+    });
+  } catch (error) {
+    console.log(`[Turing] Error: ${error}`);
+    return c.json({
+      turing: {
+        type: "error",
+        message: "Ocorreu um erro interno. Tente novamente em instantes.",
+      },
+    }, 500);
   }
 });
 
