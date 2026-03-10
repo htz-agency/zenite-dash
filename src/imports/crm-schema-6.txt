@@ -1,0 +1,436 @@
+public.crm_activities
+id — text — NOT NULL — default: none
+type — USER-DEFINED — NULL — default: none
+label — text — NULL — default: none
+date — text — NULL — default: none
+group — text — NULL — default: none
+entity_type — text — NULL — default: none
+entity_id — text — NULL — default: none
+created_at — timestamp with time zone — NULL — default: now()
+subject — text — NULL — default: none
+description — text — NULL — default: none
+status — text — NULL — default: none
+priority — text — NULL — default: none
+due_date — timestamp with time zone — NULL — default: none
+start_date — timestamp with time zone — NULL — default: none
+end_date — timestamp with time zone — NULL — default: none
+completed_at — timestamp with time zone — NULL — default: none
+assigned_to — text — NULL — default: none
+related_to_type — text — NULL — default: none
+related_to_id — text — NULL — default: none
+related_to_name — text — NULL — default: none
+contact_id — text — NULL — default: none
+contact_name — text — NULL — default: none
+location — text — NULL — default: none
+all_day — boolean — NOT NULL — default: false
+is_private — boolean — NOT NULL — default: false
+tags — text — NULL — default: none
+owner — text — NULL — default: none
+body — text — NULL — default: none
+updated_at — timestamp with time zone — NULL — default: now()
+created_by — text — NULL — default: none
+updated_by — text — NULL — default: none
+meet_link — text — NULL — default: none
+google_event_id — text — NULL — default: none
+timezone — text — NULL — default: 'America/Sao_Paulo'::text
+recurrence — text — NULL — default: none
+is_recurring — boolean — NOT NULL — default: false
+recurrence_interval — integer — NULL — default: none
+attendees — jsonb — NULL — default: '[]'::jsonb
+reminder — text — NULL — default: none
+busy_status — text — NULL — default: 'ocupado'::text
+visibility — text — NULL — default: 'padrao'::text
+calendar_name — text — NULL — default: 'Zenite CRM'::text
+call_duration — integer — NULL — default: none
+call_type — text — NULL — default: none
+call_result — text — NULL — default: none
+call_direction — text — NULL — default: none
+phone — text — NULL — default: none
+channel — text — NULL — default: none
+recipient — text — NULL — default: none
+recipient_phone — text — NULL — default: none
+sent_at — timestamp with time zone — NULL — default: none
+read_at — timestamp with time zone — NULL — default: none
+note_visibility — text — NULL — default: none
+shared_with — jsonb — NULL — default: '[]'::jsonb
+version — integer — NULL — default: 1
+created_by — text — NULL — default: none (nota: já listada acima)
+(Observação: algumas colunas podem repetir no output original; contei conforme retorno do information_schema.)
+public.crm_call_records
+id — text — NOT NULL — default: none
+phone — text — NULL — default: none
+date — text — NULL — default: none
+avatar_url — text — NULL — default: none
+entity_type — text — NULL — default: none
+entity_id — text — NULL — default: none
+created_at — timestamp with time zone — NULL — default: now()
+activity_id — text — NULL — default: none
+direction — text — NULL — default: none
+title — text — NULL — default: none
+duration — text — NULL — default: none
+notes — text — NULL — default: none
+updated_at — timestamp with time zone — NULL — default: now()
+public.crm_field_history
+id — text — NOT NULL — default: none
+entity_type — text — NULL — default: none
+entity_id — text — NULL — default: none
+field_name — text — NULL — default: none
+old_value — text — NULL — default: none
+new_value — text — NULL — default: none
+changed_by — text — NULL — default: 'Sistema'::text
+changed_at — timestamp with time zone — NULL — default: now()
+change_source — USER-DEFINED — NULL — default: ''ui'::crm_field_change_source
+public.price_clients
+id — uuid — NOT NULL — default: gen_random_uuid()
+name — text — NOT NULL — default: none
+email — text — NULL — default: none
+company — text — NULL — default: none
+phone — text — NULL — default: none
+created_at — timestamp with time zone — NULL — default: now()
+public.price_proposal_services
+id — uuid — NOT NULL — default: gen_random_uuid()
+proposal_id — text — NOT NULL — default: none
+service_id — text — NULL — default: none
+complexity — USER-DEFINED — NULL — default: 'basico'::service_complexity
+recurrence — USER-DEFINED — NULL — default: 'mensal'::service_recurrence
+seniority — USER-DEFINED — NULL — default: 'pleno'::service_seniority
+allocation — USER-DEFINED — NULL — default: 'compartilhado'::service_allocation
+include_impl — boolean — NULL — default: true
+quantity — integer — NULL — default: 1
+computed_monthly — numeric — NULL — default: 0
+computed_impl — numeric — NULL — default: 0
+computed_hours — integer — NULL — default: 0
+public.price_proposals
+id — text — NOT NULL — default: none
+client_name — text — NOT NULL — default: none
+status — USER-DEFINED — NULL — default: 'rascunho'::price_proposal_status
+notes — text — NULL — default: none
+global_discount — numeric — NULL — default: 0
+combo_discount_percent — numeric — NULL — default: 0
+combo_label — text — NULL — default: none
+total_monthly — numeric — NULL — default: 0
+total_impl — numeric — NULL — default: 0
+grand_total — numeric — NULL — default: 0
+total_hours — integer — NULL — default: 0
+created_at — timestamp with time zone — NULL — default: now()
+updated_at — timestamp with time zone — NULL — default: now()
+tag — text — NULL — default: none
+account — text — NULL — default: none
+opportunity — text — NULL — default: none
+contact — text — NULL — default: none
+public.price_services
+id — text — NOT NULL — default: none
+name — text — NULL — default: none
+service_group — text — NULL — default: none
+description — text — NULL — default: none
+base_price — numeric — NULL — default: 0
+impl_price — numeric — NULL — default: 0
+hours_estimate — numeric — NULL — default: none
+is_ads — boolean — NULL — default: false
+complexity_basico — numeric — NULL — default: 1
+complexity_intermediario — numeric — NULL — default: 1.2
+complexity_avancado — numeric — NULL — default: 1.5
+sort_order — integer — NULL — default: 100
+active — boolean — NULL — default: true
+
+public.crm_accounts
+
+id — text
+name — text
+type — USER-DEFINED
+stage — USER-DEFINED
+owner — text
+account_number — text
+sector — text
+website — text
+phone — text
+fax — text
+cnpj — text
+description — text
+annual_revenue — numeric
+employees — integer
+ownership — text
+currency — text
+rating — text
+origin — text
+account_site — text
+account_type — text
+parent_account — text
+partner_account — boolean
+sic_code — text
+ticker — text
+billing_street — text
+billing_city — text
+billing_state — text
+billing_zip — text
+billing_country — text
+shipping_street — text
+shipping_city — text
+shipping_state — text
+shipping_zip — text
+shipping_country — text
+first_name — text
+last_name — text
+email — text
+personal_phone — text
+birth_date — date
+cpf — text
+personal_street — text
+personal_city — text
+personal_state — text
+personal_zip — text
+personal_country — text
+preferred_contact — text
+do_not_contact — boolean
+tags — text
+notes — text
+last_activity — text
+last_activity_date — date
+labels — jsonb
+segment — text
+revenue — numeric
+contacts — integer
+comments — integer
+calls — integer
+mkt_campanha — text
+mkt_grupo_anuncios — text
+mkt_anuncio — text
+mkt_ultima_conversao — timestamp with time zone
+mkt_canal — text
+is_deleted — boolean
+last_viewed_date — timestamp with time zone
+last_referenced_date — timestamp with time zone
+system_modstamp — timestamp with time zone
+created_at — timestamp with time zone
+updated_at — timestamp with time zone
+created_by — text
+updated_by — text
+public.crm_activities
+
+id — text
+type — USER-DEFINED
+label — text
+date — text
+group — text
+entity_type — text
+entity_id — text
+created_at — timestamp with time zone
+public.crm_call_records
+
+id — text
+phone — text
+date — text
+avatar_url — text
+entity_type — text
+entity_id — text
+created_at — timestamp with time zone
+public.crm_contacts
+
+id — text
+name — text
+last_name — text
+role — text
+department — text
+company — text
+account — text
+phone — text
+mobile — text
+email — text
+linkedin — text
+website — text
+address — text
+stage — USER-DEFINED
+owner — text
+origin — text
+birth_date — date
+cpf — text
+preferred_contact — text
+do_not_contact — boolean
+tags — text
+notes — text
+last_activity_date — date
+last_activity_date_iso — text
+comments — integer
+calls — integer
+avatar — text
+is_deleted — boolean
+last_viewed_date — timestamp with time zone
+last_referenced_date — timestamp with time zone
+system_modstamp — timestamp with time zone
+created_at — timestamp with time zone
+updated_at — timestamp with time zone
+created_by — text
+updated_by — text
+public.crm_field_history
+
+id — text
+entity_type — text
+entity_id — text
+field_name — text
+old_value — text
+new_value — text
+changed_by — text
+changed_at — timestamp with time zone
+change_source — USER-DEFINED
+public.crm_leads
+
+id — text
+name — text
+role — text
+company — text
+phone — text
+email — text
+address — text
+type — text
+origin — text
+segment — text
+stage — USER-DEFINED
+stage_complement — text
+owner — text
+score — integer
+score_label — text
+qualification_progress — integer
+last_activity — text
+last_activity_date — date
+response_time — text
+website — text
+preferred_contact — text
+annual_revenue — numeric
+employee_count — integer
+conversion_rate — numeric
+is_active — boolean
+tags — text
+notes — text
+qualification_questions — jsonb
+mkt_campanha — text
+mkt_grupo_anuncios — text
+mkt_anuncio — text
+mkt_ultima_conversao — timestamp with time zone
+mkt_canal — text
+is_deleted — boolean
+last_viewed_date — timestamp with time zone
+last_referenced_date — timestamp with time zone
+system_modstamp — timestamp with time zone
+created_at — timestamp with time zone
+updated_at — timestamp with time zone
+created_by — text
+updated_by — text
+lastname — text
+public.crm_opportunities
+
+id — text
+name — text
+company — text
+stage — USER-DEFINED
+stage_complement — text
+tipo — USER-DEFINED
+type — text
+owner — text
+decisor — text
+account — text
+origin — text
+close_date — date
+last_activity — text
+last_activity_date — date
+value — numeric
+score — integer
+score_label — text
+comments — integer
+calls — integer
+labels — jsonb
+most_recent — boolean
+needs_objective — text
+needs_current_situation — text
+needs_challenges — text
+needs_budget — text
+needs_timeline — text
+needs_notes — text
+mkt_campanha — text
+mkt_grupo_anuncios — text
+mkt_anuncio — text
+mkt_ultima_conversao — timestamp with time zone
+mkt_canal — text
+created_at — timestamp with time zone
+updated_at — timestamp with time zone
+created_by — text
+updated_by — text
+tag — text
+public.crm_opportunity_proposals
+
+id — text
+opportunity_id — text
+client_name — text
+total_monthly — numeric
+total_impl — numeric
+active — boolean
+proposal_id — text
+created_at — timestamp with time zone
+updated_at — timestamp with time zone
+created_by — text
+updated_by — text
+public.crm_opportunity_services
+
+service_id — text
+opportunity_id — text
+name — text
+group — USER-DEFINED
+quantity — integer
+base_price — numeric
+impl_price — numeric
+hours — numeric
+public.price_clients
+
+id — uuid
+name — text
+email — text
+company — text
+phone — text
+created_at — timestamp with time zone
+public.price_proposal_services
+
+id — uuid
+proposal_id — text
+service_id — text
+complexity — USER-DEFINED
+recurrence — USER-DEFINED
+seniority — USER-DEFINED
+allocation — USER-DEFINED
+include_impl — boolean
+quantity — integer
+computed_monthly — numeric
+computed_impl — numeric
+computed_hours — integer
+public.price_proposals
+
+id — text
+client_name — text
+status — USER-DEFINED
+notes — text
+global_discount — numeric
+combo_discount_percent — numeric
+combo_label — text
+total_monthly — numeric
+total_impl — numeric
+grand_total — numeric
+total_hours — integer
+created_at — timestamp with time zone
+updated_at — timestamp with time zone
+tag — text
+account — text
+opportunity — text
+contact — text
+public.price_services
+
+id — text
+name — text
+service_group — text
+description — text
+base_price — numeric
+impl_price — numeric
+hours_estimate — numeric
+is_ads — boolean
+complexity_basico — numeric
+complexity_intermediario — numeric
+complexity_avancado — numeric
+sort_order — integer
+active — boolean

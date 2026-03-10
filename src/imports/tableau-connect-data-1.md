@@ -1,0 +1,36 @@
+Connect to Your Data
+Applies to: Tableau Cloud, Tableau Desktop, Tableau Server
+Before you can build a view and analyze your data, you must first connect Tableau to your data. Tableau supports connecting to a wide variety of data, stored in a variety of places. For example, your data might be stored on your computer in a spreadsheet or a text file, or in a big data, relational, or cube (multidimensional) database on a server in your enterprise. Or, you might connect to public domain data available on the web such as U.S. Census Bureau information, or to a cloud database source, such as Google Analytics, Amazon Redshift, or Salesforce.
+
+Starting in 2019.3, Tableau Catalog is available as part of the Data Management offering for Tableau Server and Tableau Cloud. When Tableau Catalog is enabled in your environment, in addition to connecting to published data sources, you can connect to databases and tables from Tableau Server on the Connect pane in Tableau Desktop. For more information about Tableau Catalog, see "About Tableau Catalog" in the Tableau Server or Tableau Cloud Help. Starting in 2021.4, Data Management includes virtual connections, a central access point to data. For more information, see "About Virtual Connections and Data Policies" in the Tableau Server(Link opens in a new window) or Tableau Cloud(Link opens in a new window) help.
+
+Tableau Desktop
+When you launch Tableau Desktop, the data connectors that are available to you are listed on the Connect pane, which is the left pane on the Start page. Under Search for Data, select Tableau Server to find data using Tableau Server or Tableau Cloud. File types are listed next, then common server types, or servers that you've recently connected to. Click More to see the complete list of data connectors you can use.
+
+For supported files and databases, Tableau provides native connectors that are built for and optimized for those types of data. If your file or database type is listed under Connect, use this native connector to connect to your data. If your file or database type isn’t listed, you might have the option of creating your own connection using Other Databases (JDBC), Other Databases (ODBC), a Web Data Connector, or a Connector Plugin built using the Tableau Connector SDK. Tableau provides limited support for connections that you create using these options.
+
+The data connectors supported by your copy of Tableau Desktop are determined by the version you purchased. For more information, see the list of data connectors(Link opens in a new window) on the Tableau website. After you've connected to data, you can save the connections to have them show up under the Saved data sources section on the Connect pane.
+
+You supply different information for each data connection that you want to make. For example, for most data connections, you’ll need to supply a server name and your sign-in information. With some data connections, you can Run Initial SQL statements, and SSL-enabled servers require that you select the Require SSL check box when you connect. The following sections discuss the specific information you must provide for each type of data you want to connect to.
+
+Tip: You can quickly create a data source in Tableau by copying and pasting data using the clipboard. For more information, see Create a Data Source or Add a New Connection with Clipboard Data .
+
+Tableau Server and Tableau Cloud web authoring
+Sign in to your Tableau site and select New > Create Workbook on the Home page to open the Connect to Data page. The tabs that you see on the pages depend on the product you have.
+
+Tableau Server
+Tableau Cloud
+On Tableau Server, select from the following tabs to connect to data:
+
+On this site. Browse to or search for published data sources. If you have Data Management, you can also connect to data using a virtual connection. If you have Data Management with Tableau Catalog enabled, you can additionally connect to external assets like databases, files, and tables.
+Files. Upload Excel or text-based data sources (.xlsx, .csv, .tsv) directly in your browser.
+Connectors. Connect to data housed in a cloud database or on a server in your enterprise.
+For more information about connecting to data, see Creators: Connect to Data on the Web.
+
+The data connectors supported by your Tableau site are determined by your site's server and your license level. For more information, see What Can I Do with a Tableau Site?
+
+After you've connected to data, you can save the connections to have them show up in the Data Sources section of your site.
+
+Request a new connector
+If Tableau doesn't have a native (built-in) connector for your data, consider requesting one on Tableau Community. Use Ideas(Link opens in a new window) on Community to search for your connector to see if it's been requested, and if it has been, vote for it. If it's not listed, add it. Tableau regularly reviews Ideas on Community to help determine what features should be added to the product.
+
