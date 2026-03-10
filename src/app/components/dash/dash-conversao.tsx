@@ -26,6 +26,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export function DashConversao() {
   const { conversionFunnel, leadsBySource, monthlyRevenue, loading } = useDashData();
 
+  /* ── Map data keys to Portuguese labels ── */
+  const mappedLeadsBySource = useMemo(() => leadsBySource.map(d => ({ Origem: d.source, Leads: d.count, Valor: d.value })), [leadsBySource]);
+  const mappedMonthlyRevenue = useMemo(() => monthlyRevenue.map(d => ({ Mês: d.month, Conversão: d.conversao })), [monthlyRevenue]);
+
   const { funnelData, overallConversion, mqlToSql, sqlToOpp } = useMemo(() => {
     const funnelData = conversionFunnel.map((item, i, arr) => ({
       ...item,
@@ -106,7 +110,7 @@ export function DashConversao() {
         <DashChartCard title="Tendência de Conversão" subtitle="Evolução mensal %" icon={<TrendUp size={18} weight="duotone" />} delay={0.2}>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyRevenue} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <AreaChart data={mappedMonthlyRevenue} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="convGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#0483AB" stopOpacity={0.25} />
@@ -114,10 +118,10 @@ export function DashConversao() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#EEF1F6" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#4E6987", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="Mês" tick={{ fontSize: 11, fill: "#4E6987", fontWeight: 500 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: "#98989d" }} axisLine={false} tickLine={false} unit="%" />
                 <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="conversao" name="Conversão" fill="url(#convGrad)" stroke="#0483AB" strokeWidth={2.5} dot={{ r: 4, fill: "#0483AB", stroke: "#fff", strokeWidth: 2 }} animationDuration={1200} />
+                <Area type="monotone" dataKey="Conversão" name="Conversão" fill="url(#convGrad)" stroke="#0483AB" strokeWidth={2.5} dot={{ r: 4, fill: "#0483AB", stroke: "#fff", strokeWidth: 2 }} animationDuration={1200} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -126,12 +130,12 @@ export function DashConversao() {
         <DashChartCard title="Conversão por Origem" subtitle="Performance de cada canal" icon={<ChartDonut size={18} weight="duotone" />} delay={0.25}>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={leadsBySource} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <BarChart data={mappedLeadsBySource} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#EEF1F6" vertical={false} />
-                <XAxis dataKey="source" tick={{ fontSize: 10, fill: "#4E6987", fontWeight: 500 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="Origem" tick={{ fontSize: 10, fill: "#4E6987", fontWeight: 500 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: "#98989d" }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v / 1000}k`} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="value" name="Valor" radius={[8, 8, 0, 0]} barSize={32} animationDuration={1000}>
+                <Bar dataKey="Valor" name="Valor" radius={[8, 8, 0, 0]} barSize={32} animationDuration={1000}>
                   {leadsBySource.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Bar>
               </BarChart>

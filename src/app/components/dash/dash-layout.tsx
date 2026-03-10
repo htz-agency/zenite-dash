@@ -2,7 +2,7 @@ import { Outlet, useLocation, useNavigate } from "react-router";
 import { DashSidebar } from "./dash-sidebar";
 import {
   Bell, List, MagnifyingGlass, CalendarBlank, Export, Funnel, CaretDown,
-  CloudCheck, CloudSlash, ArrowsClockwise, X, Check, FilePdf, FileCsv,
+  CloudCheck, CloudSlash, ArrowsClockwise, X, Check, FilePdf, FileCsv, Swatches,
 } from "@phosphor-icons/react";
 import { useState, useRef, Suspense, useEffect } from "react";
 import { Toaster, toast } from "sonner";
@@ -12,6 +12,17 @@ import { DashFilterProvider, useDashFilters, PERIOD_OPTIONS } from "./dash-filte
 import { exportToCSV, exportToPDF } from "./dash-export-utils";
 
 const ff = { fontFeatureSettings: "'ss01', 'ss04', 'ss05', 'ss07'" };
+
+// Silenciar erro de Clipboard API não disponível
+if (typeof window !== 'undefined') {
+  const originalError = console.error;
+  console.error = (...args) => {
+    if (args[0]?.toString().includes('Clipboard API') || args[0]?.toString().includes('writeText')) {
+      return; // Silenciar erro de clipboard
+    }
+    originalError.apply(console, args);
+  };
+}
 
 function SyncIndicator() {
   const { loading, error, lastSynced, refetch } = useDashData();
@@ -23,9 +34,11 @@ function SyncIndicator() {
   );
   if (error) return (
     <button onClick={() => refetch()}
-      className="flex items-center gap-1.5 h-[30px] px-3 rounded-full bg-[#FFEDEB] text-[#ED5200] hover:bg-[#FFDDD8] transition-colors cursor-pointer">
+      className="flex items-center gap-1.5 h-[30px] px-3 rounded-full bg-[#FFF4E6] text-[#917822] hover:bg-[#FFEBD0] transition-colors cursor-pointer">
       <CloudSlash size={12} weight="fill" />
-      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: -0.3, ...ff }}>Erro · Reconectar</span>
+      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: -0.3, ...ff }}>
+        {error.includes("demonstração") ? "Dados Demo" : "Erro · Reconectar"}
+      </span>
     </button>
   );
   return (
@@ -245,6 +258,7 @@ function DashTopBar({ onMenuToggle }: { onMenuToggle: () => void }) {
   const [exportOpen, setExportOpen] = useState(false);
   const exportBtnRef = useRef<HTMLButtonElement>(null);
   const periodLabel = PERIOD_OPTIONS.find(p => p.value === period)?.label || "Todos";
+  const navigate = useNavigate();
 
   return (
     <>
@@ -281,6 +295,11 @@ function DashTopBar({ onMenuToggle }: { onMenuToggle: () => void }) {
                 style={{ fontSize: 8, fontWeight: 700 }}>{activeFilterCount}</span>
             )}
           </button>
+          {/* Design System */}
+          <button onClick={() => navigate('/design-system')}
+            className="flex items-center justify-center w-[34px] h-[34px] rounded-full bg-white border border-[#DDE3EC] text-[#4E6987] hover:bg-[#f6f7f9] transition-colors cursor-pointer">
+            <Swatches size={16} weight="duotone" />
+          </button>
           {/* Export */}
           <div className="relative">
             <button ref={exportBtnRef} onClick={() => setExportOpen(v => !v)}
@@ -308,6 +327,9 @@ function DashTopBar({ onMenuToggle }: { onMenuToggle: () => void }) {
 export function DashLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  
+  // Desabilitar animação de transição para rotas de visualização (view)
+  const isViewRoute = location.pathname.includes('/view');
 
   return (
     <DashDataProvider>
@@ -318,20 +340,34 @@ export function DashLayout() {
           <div className="flex flex-col flex-1 overflow-hidden min-w-0">
             <DashTopBar onMenuToggle={() => setSidebarOpen(true)} />
             <main className="flex-1 overflow-hidden flex flex-col">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={location.pathname}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-                  className="flex-1 flex flex-col items-stretch justify-start overflow-auto pr-[10px] pb-[10px] pt-[10px] pl-0"
-                >
+              {isViewRoute ? (
+                // Sem animação para rotas de visualização
+                <div className="flex-1 flex flex-col items-stretch justify-start overflow-auto pr-[10px] pb-[10px] pt-[10px] pl-0">
                   <Suspense fallback={<div className="flex items-center justify-center h-32 text-[#98989d]">Carregando...</div>}>
-                    <Outlet />
+                    <div className="flex-1 flex flex-col">
+                      <Outlet />
+                    </div>
                   </Suspense>
-                </motion.div>
-              </AnimatePresence>
+                </div>
+              ) : (
+                // Com animação para outras rotas
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={location.pathname}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                    className="flex-1 flex flex-col items-stretch justify-start overflow-auto pr-[10px] pb-[10px] pt-[10px] pl-0"
+                  >
+                    <Suspense fallback={<div className="flex items-center justify-center h-32 text-[#98989d]">Carregando...</div>}>
+                      <div className="flex-1 flex flex-col">
+                        <Outlet />
+                      </div>
+                    </Suspense>
+                  </motion.div>
+                </AnimatePresence>
+              )}
             </main>
           </div>
         </div>

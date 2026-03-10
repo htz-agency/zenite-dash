@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import {
   ChartBar, ChartLineUp, FunnelSimple, Lightning, Target, ChartDonut,
   Table, Cube, Presentation, ArrowRight, Plus, Star, Clock, Sparkle,
-  CloudCheck, Database, SelectionPlus,
+  CloudCheck, Database, SelectionPlus, PencilRuler,
 } from "@phosphor-icons/react";
 import { useDashData, formatCurrency } from "./dash-data-provider";
 
@@ -19,6 +19,7 @@ const quickAccess = [
   { title: "Tabelas Cruzadas", desc: "Dados multi-objeto", icon: <Table size={24} weight="duotone" />, bg: "#F6F7F9", color: "#4E6987", to: "/explorador/tabelas" },
   { title: "Objetos CRM", desc: "Explorar dados brutos", icon: <Cube size={24} weight="duotone" />, bg: "#F6F7F9", color: "#28415C", to: "/explorador/objetos" },
   { title: "Dashboard Builder", desc: "Monte seu painel personalizado", icon: <SelectionPlus size={24} weight="duotone" />, bg: "#E8E8FD", color: "#6868B1", to: "/dashboards/builder" },
+  { title: "Visual Builder", desc: "Crie análises como no Tableau", icon: <PencilRuler size={24} weight="duotone" />, bg: "#DCF0FF", color: "#0483AB", to: "/estudio/visual" },
 ];
 
 const recentReports = [

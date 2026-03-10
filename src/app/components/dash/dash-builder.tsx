@@ -314,6 +314,11 @@ export function DashBuilder() {
 
   /* ── Render Widget Content ── */
   const renderWidget = (widget: Widget) => {
+    /* ── Map data keys to Portuguese labels ── */
+    const mappedPipeline = pipelineByStage.map(d => ({ Estágio: d.stage, Valor: d.value, Quantidade: d.count }));
+    const mappedLeadsBySource = leadsBySource.map(d => ({ Origem: d.source, Leads: d.count, Valor: d.value }));
+    const mappedActivityByType = activityByType.map(d => ({ Tipo: d.type, Quantidade: d.count, color: d.color }));
+
     switch (widget.type) {
       case "kpi-pipeline":
         return (
@@ -352,18 +357,18 @@ export function DashBuilder() {
           <div className="h-full px-2 pt-1 pb-2">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={monthlyRevenue} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="revGradB" x1="0" y1="0" x2="0" y2="1">
+                <defs key="rev-defs">
+                  <linearGradient id={`revGradB-${widget.id}`} x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#0483AB" stopOpacity={0.2} />
                     <stop offset="100%" stopColor="#0483AB" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EEF1F6" vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#4E6987" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 9, fill: "#98989d" }} axisLine={false} tickLine={false} tickFormatter={v => `${v / 1000}k`} />
-                <Tooltip content={<ChartTooltip />} />
-                <Area type="monotone" dataKey="receita" name="Receita" fill="url(#revGradB)" stroke="#0483AB" strokeWidth={2} animationDuration={1000} />
-                <Bar dataKey="leads" name="Leads" fill="#07ABDE" radius={[3, 3, 0, 0]} barSize={14} opacity={0.6} animationDuration={800} />
+                <CartesianGrid key="grid-rev" strokeDasharray="3 3" stroke="#EEF1F6" vertical={false} />
+                <XAxis key="x-rev" dataKey="month" tick={{ fontSize: 10, fill: "#4E6987" }} axisLine={false} tickLine={false} />
+                <YAxis key="y-rev" tick={{ fontSize: 9, fill: "#98989d" }} axisLine={false} tickLine={false} tickFormatter={v => `${v / 1000}k`} />
+                <Tooltip key="tip-rev" content={<ChartTooltip />} />
+                <Area key="area-receita" type="monotone" dataKey="receita" name="Receita" fill={`url(#revGradB-${widget.id})`} stroke="#0483AB" strokeWidth={2} animationDuration={1000} />
+                <Bar key="bar-leads" dataKey="leads" name="Leads" fill="#07ABDE" radius={[3, 3, 0, 0]} barSize={14} opacity={0.6} animationDuration={800} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -373,15 +378,15 @@ export function DashBuilder() {
           <div className="h-full flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={pipelineByStage} cx="50%" cy="50%" innerRadius="50%" outerRadius="80%" dataKey="value" nameKey="stage"
+                <Pie data={mappedPipeline} cx="50%" cy="50%" innerRadius="50%" outerRadius="80%" dataKey="Valor" nameKey="Estágio"
                   onClick={(data) => {
-                    setCrossFilter("stage", data.stage);
-                    const stageOpps = filteredOpps.filter(o => o.stage === data.stage);
-                    openDrill(`Pipeline — ${data.stage}`, "stage", stageOpps.map(o => ({ label: o.name, value: o.value, sublabel: `${o.owner} · ${o.probability}%` })));
+                    setCrossFilter("stage", data["Estágio"]);
+                    const stageOpps = filteredOpps.filter(o => o.stage === data["Estágio"]);
+                    openDrill(`Pipeline — ${data["Estágio"]}`, "stage", stageOpps.map(o => ({ label: o.name, value: o.value, sublabel: `${o.owner} · ${o.probability}%` })));
                   }}
                   animationDuration={1000} style={{ cursor: "pointer" }}>
-                  {pipelineByStage.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="white" strokeWidth={2}
-                    opacity={crossFilter?.dimension === "stage" && crossFilter?.value !== pipelineByStage[i].stage ? 0.3 : 1} />)}
+                  {mappedPipeline.map((entry, i) => <Cell key={`pipe-cell-${i}`} fill={COLORS[i % COLORS.length]} stroke="white" strokeWidth={2}
+                    opacity={crossFilter?.dimension === "stage" && crossFilter?.value !== entry["Estágio"] ? 0.3 : 1} />)}
                 </Pie>
                 <Tooltip content={<ChartTooltip />} />
               </PieChart>
@@ -392,15 +397,15 @@ export function DashBuilder() {
         return (
           <div className="h-full px-2 pt-1 pb-2">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={leadsBySource} layout="vertical" margin={{ top: 5, right: 10, left: 5, bottom: 5 }}>
+              <BarChart data={mappedLeadsBySource} layout="vertical" margin={{ top: 5, right: 10, left: 5, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#EEF1F6" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 9, fill: "#98989d" }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="source" tick={{ fontSize: 10, fill: "#4E6987" }} axisLine={false} tickLine={false} width={70} />
+                <YAxis type="category" dataKey="Origem" tick={{ fontSize: 10, fill: "#4E6987" }} axisLine={false} tickLine={false} width={70} />
                 <Tooltip content={<ChartTooltip />} />
-                <Bar dataKey="count" name="Leads" radius={[0, 6, 6, 0]} barSize={14} animationDuration={800}
-                  onClick={(data) => setCrossFilter("source", data.source)}>
-                  {leadsBySource.map((entry, i) => <Cell key={i} fill={COLORS[i % COLORS.length]}
-                    opacity={crossFilter?.dimension === "source" && crossFilter?.value !== entry.source ? 0.3 : 1} />)}
+                <Bar dataKey="Leads" name="Leads" radius={[0, 6, 6, 0]} barSize={14} animationDuration={800}
+                  onClick={(data) => setCrossFilter("source", data["Origem"])}>
+                  {mappedLeadsBySource.map((entry, i) => <Cell key={`src-cell-${i}`} fill={COLORS[i % COLORS.length]}
+                    opacity={crossFilter?.dimension === "source" && crossFilter?.value !== entry["Origem"] ? 0.3 : 1} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -410,13 +415,13 @@ export function DashBuilder() {
         return (
           <div className="h-full px-2 pt-1 pb-2">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={activityByType} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <BarChart data={mappedActivityByType} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#EEF1F6" vertical={false} />
-                <XAxis dataKey="type" tick={{ fontSize: 10, fill: "#4E6987" }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="Tipo" tick={{ fontSize: 10, fill: "#4E6987" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 9, fill: "#98989d" }} axisLine={false} tickLine={false} />
                 <Tooltip content={<ChartTooltip />} />
-                <Bar dataKey="count" name="Quantidade" radius={[6, 6, 0, 0]} barSize={32} animationDuration={800}>
-                  {activityByType.map((entry, i) => <Cell key={i} fill={entry.color || COLORS[i % COLORS.length]} />)}
+                <Bar dataKey="Quantidade" name="Quantidade" radius={[6, 6, 0, 0]} barSize={32} animationDuration={800}>
+                  {mappedActivityByType.map((entry, i) => <Cell key={`act-cell-${i}`} fill={entry.color || COLORS[i % COLORS.length]} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
